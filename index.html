@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Tiệm Tạp Hóa Ký Ức</title>
+  <style>
+    :root {
+      --wall: #f6e7c1;
+      --card: #fffaf0;
+      --wood-dark: #5c3416;
+      --wood-mid: #854d27;
+      --ink: #3b2314;
+      --green: #1f7a38;
+      --amber: #b45309;
+      --red: #b91c1c;
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
+    html, body {
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      background: #3b2314;
+      color: var(--ink);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .app {
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      min-height: 100vh;
+      background: var(--wall);
+      display: flex;
+      flex-direction: column;
+    }
+    .roof {
+      height: 16px;
+      background: repeating-linear-gradient(90deg, #b83b2b 0 24px, #92291c 24px 48px);
+      border-bottom: 3px solid var(--wood-dark);
+    }
+    .header {
+      background: linear-gradient(180deg, #fdf3d7, #edd49d);
+      border-bottom: 3px solid var(--wood-dark);
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .shop-title { font-size: 15px; font-weight: 900; color: #8b1e16; line-height: 1.15; }
+    .shop-sub { font-size: 11px; font-weight: 700; color: var(--wood-dark); }
+    .top-actions { display: flex; gap: 5px; flex-wrap: wrap; }
+
+    .btn {
+      background: var(--card);
+      color: var(--ink);
+      border: 2px solid var(--wood-mid);
+      border-radius: 9px;
+      padding: 5px 8px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 2px 0 var(--wood-dark);
+    }
+    .btn:active { transform: translateY(2px); box-shadow: none; }
+    .btn.green { background: #1f7a38; color: #fff; border-color: #124d22; }
+    .btn.amber { background: #d97706; color: #fff; border-color: #78350f; }
+    .btn.red { background: #b91c1c; color: #fff; border-color: #7f1d1d; }
+    .btn.active { background: var(--wood-dark); color: #fff8e7; }
+
+    .hud {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 5px;
+      padding: 6px 8px;
+      background: var(--wood-dark);
+      color: #fff8e7;
+    }
+    .hud-box {
+      background: rgba(255,255,255,0.12);
+      border-radius: 8px;
+      padding: 4px 5px;
+      text-align: center;
+    }
+    .hud-k { font-size: 9px; opacity: 0.9; font-weight: 700; }
+    .hud-v { font-size: 12px; font-weight: 900; margin-top: 1px; }
+
+    .banner {
+      margin: 7px 8px 0;
+      padding: 6px 9px;
+      border-radius: 10px;
+      background: #fffbeb;
+      border: 1.5px solid #d97706;
+      font-size: 11px;
+      font-weight: 700;
+      color: #78350f;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+    .banner.paused {
+      background: #fef3c7;
+      border-color: #b45309;
+      color: #92400e;
+    }
+
+    .section {
+      margin: 8px;
+      background: var(--card);
+      border: 2px solid var(--wood-dark);
+      border-radius: 13px;
+      padding: 8px;
+    }
+    .sec-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 900;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
+    }
+
+    .empty-shop-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      background: #fffdf7;
+      border: 2px dashed var(--wood-mid);
+      border-radius: 12px;
+      padding: 12px 10px;
+      gap: 7px;
+    }
+    .owner-svg {
+      width: 96px;
+      height: 96px;
+      cursor: pointer;
+    }
+    .owner-bubble {
+      background: #fff;
+      border: 2px solid var(--wood-dark);
+      border-radius: 12px;
+      padding: 7px 11px;
+      font-size: 12px;
+      font-weight: 800;
+      max-width: 360px;
+    }
+
+    .customer-row { display: flex; gap: 8px; align-items: center; }
+    .face-box {
+      width: 84px;
+      min-width: 84px;
+      background: #fdf2d6;
+      border: 2px solid var(--wood-dark);
+      border-radius: 12px;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      cursor: pointer;
+    }
+    .face-svg { width: 62px; height: 62px; }
+    .voice-tag {
+      font-size: 9px;
+      font-weight: 900;
+      background: #fde68a;
+      border: 1px solid #d97706;
+      border-radius: 99px;
+      padding: 1px 6px;
+      margin-top: 2px;
+    }
+    .cust-info { flex: 1; min-width: 0; }
+    .order-say { font-size: 12px; font-weight: 800; margin: 3px 0 5px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+    .chip {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 2px 7px;
+      border-radius: 99px;
+      background: #f4e4c4;
+      border: 1.5px solid var(--wood-mid);
+      cursor: pointer;
+    }
+    .chip.ok { background: #dcfce7; border-color: #15803d; color: #166534; }
+
+    .bar-wrap { display: flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 800; }
+    .bar {
+      flex: 1;
+      height: 8px;
+      background: #e7d5b5;
+      border-radius: 99px;
+      overflow: hidden;
+      border: 1px solid var(--wood-mid);
+    }
+    .bar-fill { height: 100%; background: #22c55e; transition: width 0.15s linear; }
+
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+    .cat-btn {
+      background: #fdf5e4;
+      border: 1.5px solid var(--wood-mid);
+      border-radius: 8px;
+      padding: 5px 2px;
+      font-size: 10px;
+      font-weight: 800;
+      text-align: center;
+      cursor: pointer;
+    }
+    .cat-btn.active { background: var(--wood-dark); color: #fff8e7; }
+
+    .items-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; }
+    .item-card {
+      background: #fffdf8;
+      border: 2px solid var(--wood-mid);
+      border-radius: 11px;
+      padding: 7px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 5px;
+    }
+    .item-card.need { border-color: #d97706; background: #fffbeb; }
+    .item-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 4px; }
+    .item-name { font-size: 11.5px; font-weight: 900; line-height: 1.2; }
+    .badge-stock {
+      font-size: 10px;
+      font-weight: 900;
+      padding: 1px 6px;
+      border-radius: 99px;
+      background: #e7f6ec;
+      color: #166534;
+      border: 1px solid #16a34a;
+      white-space: nowrap;
+    }
+    .badge-stock.empty { background: #fee2e2; color: #991b1b; border-color: #dc2626; }
+    .item-prices { font-size: 10.5px; font-weight: 800; color: #7c2d12; }
+    .item-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+
+    .tray-list {
+      min-height: 38px;
+      background: #f5e6c8;
+      border: 1.5px dashed var(--wood-mid);
+      border-radius: 9px;
+      padding: 5px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      align-items: center;
+      margin-bottom: 7px;
+    }
+    .action-row { display: flex; gap: 6px; }
+    .action-row .btn { flex: 1; padding: 8px 6px; font-size: 11.5px; }
+
+    .backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(24, 13, 5, 0.75);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      z-index: 600;
+    }
+    .backdrop.show { display: flex; }
+    .modal {
+      width: 100%;
+      max-width: 430px;
+      max-height: 86vh;
+      overflow-y: auto;
+      background: var(--card);
+      border: 3px solid var(--wood-dark);
+      border-radius: 15px;
+      padding: 13px;
+    }
+    .modal-h {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #ebd3a2;
+      padding-bottom: 6px;
+      margin-bottom: 9px;
+      font-size: 14px;
+      font-weight: 900;
+      color: #7c2d12;
+    }
+    .input-name {
+      width: 100%;
+      padding: 8px 10px;
+      border: 2px solid var(--wood-mid);
+      border-radius: 9px;
+      font-size: 13px;
+      font-weight: 700;
+      margin: 6px 0 8px;
+      color: var(--ink);
+      background: #fff;
+    }
+    .toast {
+      position: fixed;
+      left: 50%;
+      top: 38%;
+      transform: translate(-50%, -50%);
+      background: rgba(45, 24, 9, 0.94);
+      color: #fde047;
+      border: 2px solid #facc15;
+      border-radius: 99px;
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 900;
+      z-index: 999;
+      pointer-events: none;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="roof"></div>
+  <div class="header">
+    <div>
+      <div class="shop-title" id="shopNameTitle">🏮 Tiệm Tạp Hóa Ký Ức</div>
+      <div class="shop-sub" id="mapSub">📍 Khu Trường Học • Thuê 500k/tuần</div>
+    </div>
+    <div class="top-actions">
+      <button class="btn" id="openBtn" onclick="toggleOpen()">🟢 Đang Mở</button>
+      <button class="btn amber" onclick="openModal('nameModal')">✏️ Đổi Tên</button>
+      <button class="btn green" onclick="openModal('bulkModal')">📦 Nhập Thêm Đồ</button>
+      <button class="btn" onclick="openModal('infoModal')">📊 Mặt Bằng &amp; Giá TB</button>
+      <button class="btn red" onclick="resetGame()">↺ Reset</button>
+    </div>
+  </div>
+
+  <div class="hud">
+    <div class="hud-box">
+      <div class="hud-k">VỐN / NỢ</div>
+      <div class="hud-v" id="hudMoney">220k</div>
+    </div>
+    <div class="hud-box">
+      <div class="hud-k">UY TÍN</div>
+      <div class="hud-v" id="hudStars">⭐ 0.0</div>
+    </div>
+    <div class="hud-box">
+      <div class="hud-k">NGÀY / GIỜ</div>
+      <div class="hud-v" id="hudDay">N1/7 • 05:00</div>
+    </div>
+    <div class="hud-box">
+      <div class="hud-k">MẶT BẰNG</div>
+      <div class="hud-v" id="hudRent">0/500k</div>
+    </div>
+  </div>
+
+  <div class="banner paused" id="statusBanner">
+    <span id="bannerText">⏸ Chưa bày hàng lên kệ: Đang tạm dừng đếm giờ!</span>
+    <span id="avgBadge" style="white-space:nowrap;">TB kệ: 0k</span>
+  </div>
+
+  <div class="section" id="stageSection"></div>
+
+  <div class="section">
+    <div class="sec-head">
+      <span id="shelfTitle">🛒 Kệ Hàng Bày Bán</span>
+      <div style="display:flex;gap:4px;">
+        <button class="btn green" onclick="restockCategory(3)">+3 Kệ Này</button>
+        <button class="btn amber" onclick="openModal('bulkModal')">+ Thêm Mặt Hàng</button>
+      </div>
+    </div>
+    <div class="cat-grid" id="catGrid"></div>
+    <div class="items-grid" id="itemsGrid"></div>
+  </div>
+
+  <div class="section">
+    <div class="sec-head">
+      <span id="trayTitle">🧺 Khay Giao (0/5)</span>
+      <span id="calmLabel">🧘 Bình Tĩnh: 0 (+0s)</span>
+    </div>
+    <div class="tray-list" id="trayList"></div>
+    <div class="action-row">
+      <button class="btn" onclick="clearTray()">🗑️ Xóa Khay</button>
+      <button class="btn green" onclick="deliverOrder()">✅ Giao Khách</button>
+      <button class="btn amber" onclick="calmDown()">🧘 Bình Tĩnh</button>
+      <button class="btn red" onclick="triggerDashTest()">🏃 Quỵt Tiền</button>
+    </div>
+  </div>
+</div>
+
+<div class="backdrop" id="nameModal">
+  <div class="modal">
+    <div class="modal-h">
+      <span>🏮 Đặt Tên Tiệm Tạp Hóa Của Bạn</span>
+      <button class="btn red" onclick="closeModal('nameModal')">Đóng</button>
+    </div>
+    <div style="font-size:12px;font-weight:700;">
+      Vốn khởi đầu: <b>220k</b> • Uy tín: <b>⭐ 0.0</b> • Nhập sỉ rẻ hơn <b>50%</b>.
+    </div>
+    <input class="input-name" id="shopNameInput" maxlength="32" value="Tiệm Tạp Hóa Ký Ức" />
+    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;">
+      <button class="btn" onclick="setPresetName('Tiệm Cô Ba')">Tiệm Cô Ba</button>
+      <button class="btn" onclick="setPresetName('Tạp Hóa Đầu Ngõ')">Tạp Hóa Đầu Ngõ</button>
+      <button class="btn" onclick="setPresetName('Tiệm Ký Ức Xưa')">Tiệm Ký Ức Xưa</button>
+    </div>
+    <button class="btn green" style="width:100%;padding:9px;font-size:12.5px;" onclick="confirmName()">
+      ✅ Xác Nhận Tên &amp; Bắt Đầu Nhập Hàng
+    </button>
+  </div>
+</div>
+
+<div class="backdrop" id="bulkModal">
+  <div class="modal">
+    <div class="modal-h">
+      <span>📦 Nhập Thêm Mặt Hàng Về Bày Bán</span>
+      <button class="btn red" onclick="closeModal('bulkModal')">Đóng</button>
+    </div>
+    <div id="bulkBody" style="font-size:12px;"></div>
+  </div>
+</div>
+
+<div class="backdrop" id="infoModal">
+  <div class="modal">
+    <div class="modal-h">
+      <span>📊 Mặt Bằng • Giá Trung Bình • Cân Bằng</span>
+      <button class="btn red" onclick="closeModal('infoModal')">Đóng</button>
+    </div>
+    <div id="infoBody" style="font-size:12px;"></div>
+  </div>
+</div>
+
+<div class="backdrop" id="dashModal">
+  <div class="modal">
+    <div class="modal-h">
+      <span>🏃 Khách Ôm Hàng Chạy Mất!</span>
+    </div>
+    <div id="dashBody" style="font-size:12px;margin-bottom:10px;font-weight:700;"></div>
+    <div class="action-row">
+      <button class="btn green" onclick="resolveDash(true)">👟 1. Rượt theo đòi (20%)</button>
+      <button class="btn" onclick="resolveDash(false)">😔 2. Không đuổi theo (-0.2⭐, +3s)</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CATEGORIES = [
+  { id: 'drinks', name: '🥤 Nước Chai' },
+  { id: 'snacks', name: '🍬 Bánh Kẹo' },
+  { id: 'kitchen', name: '🍜 Đồ Bếp' },
+  { id: 'sundries', name: '🪥 Lặt Vặt' },
+  { id: 'household', name: '🧹 Gia Dụng' }
+];
+
+const ITEMS = [
+  { id: 'cam_ep', cat: 'drinks', name: 'Nước Cam Chai', cost: 6, price: 10 },
+  { id: 'tang_luc', cat: 'drinks', name: 'Tăng Lực Chai', cost: 7, price: 12 },
+  { id: 'tra_xanh', cat: 'drinks', name: 'Trà Xanh Chai', cost: 7, price: 11 },
+  { id: 'nuoc_khoang', cat: 'drinks', name: 'Nước Khoáng', cost: 3, price: 6 },
+  { id: 'sua_dau_nanh', cat: 'drinks', name: 'Sữa Đậu Nành', cost: 5, price: 9 },
+  { id: 'soda_chanh', cat: 'drinks', name: 'Soda Chanh Muối', cost: 6, price: 10 },
+
+  { id: 'keo_keo', cat: 'snacks', name: 'Kẹo Kéo', cost: 2, price: 5 },
+  { id: 'banh_que', cat: 'snacks', name: 'Bánh Quế', cost: 4, price: 7 },
+  { id: 'xi_muoi', cat: 'snacks', name: 'Xí Muội', cost: 3, price: 6 },
+  { id: 'snack_cua', cat: 'snacks', name: 'Snack Cua', cost: 4, price: 8 },
+  { id: 'keo_mut', cat: 'snacks', name: 'Kẹo Mút Trái Cây', cost: 2, price: 5 },
+  { id: 'banh_mi_ngot', cat: 'snacks', name: 'Bánh Mì Bơ Sữa', cost: 5, price: 9 },
+
+  { id: 'mi_tom', cat: 'kitchen', name: 'Mì Gói', cost: 3, price: 6 },
+  { id: 'nuoc_mam', cat: 'kitchen', name: 'Nước Mắm Nhĩ', cost: 14, price: 22 },
+  { id: 'trung_ga', cat: 'kitchen', name: 'Chục Trứng Gà', cost: 18, price: 28 },
+  { id: 'dau_an', cat: 'kitchen', name: 'Dầu Ăn 1L', cost: 24, price: 36 },
+  { id: 'gao_thom', cat: 'kitchen', name: 'Túi Gạo Thơm 2kg', cost: 22, price: 34 },
+  { id: 'hat_nem', cat: 'kitchen', name: 'Gói Hạt Nêm', cost: 9, price: 15 },
+
+  { id: 'xa_bong', cat: 'sundries', name: 'Xà Bông Cục', cost: 8, price: 14 },
+  { id: 'pin_con_o', cat: 'sundries', name: 'Cặp Pin Con Ó', cost: 5, price: 10 },
+  { id: 'bat_lua', cat: 'sundries', name: 'Bật Lửa', cost: 3, price: 6 },
+  { id: 'vo_oly', cat: 'sundries', name: 'Vở Ô Ly', cost: 6, price: 11 },
+  { id: 'bang_keo', cat: 'sundries', name: 'Cuộn Băng Keo', cost: 5, price: 9 },
+  { id: 'thuoc_dan', cat: 'sundries', name: 'Hộp Băng Cá Nhân', cost: 4, price: 8 },
+
+  { id: 'bong_den', cat: 'household', name: 'Bóng Đèn LED', cost: 22, price: 35 },
+  { id: 'choi_chit', cat: 'household', name: 'Chổi Chít', cost: 42, price: 65 },
+  { id: 'ro_nhua', cat: 'household', name: 'Rổ Nhựa', cost: 20, price: 32 },
+  { id: 'khan_bep', cat: 'household', name: 'Khăn Lau Bếp', cost: 17, price: 28 },
+  { id: 'thau_nhua', cat: 'household', name: 'Thau Nhựa Lớn', cost: 35, price: 55 },
+  { id: 'keo_cat', cat: 'household', name: 'Kéo Cắt Gia Dụng', cost: 30, price: 48 }
+];
+
+const MAPS = [
+  { id: 'hem_que', name: 'Hẻm Nhỏ Quê Nhà', rent: 300, tip: 0, bias: 'kitchen' },
+  { id: 'xom_cho', name: 'Ngã Ba Xóm Chợ', rent: 350, tip: 1, bias: 'household' },
+  { id: 'tap_the', name: 'Khu Tập Thể Cũ', rent: 380, tip: 1, bias: 'household' },
+  { id: 'ben_xe', name: 'Bến Xe Liên Tỉnh', rent: 400, tip: 2, bias: 'drinks' },
+  { id: 'truong_hoc', name: 'Khu Trường Học', rent: 500, tip: 2, bias: 'snacks' }
+];
+
+const CUSTOMERS = [
+  { name: 'Bé Tí', age: 'child', tag: 'Trẻ nhỏ' },
+  { name: 'Bé Bi', age: 'child', tag: 'Trẻ nhỏ' },
+  { name: 'Cậu Nam', age: 'youth', tag: 'Bạn trẻ' },
+  { name: 'Bạn Lan', age: 'youth', tag: 'Bạn trẻ' },
+  { name: 'Bà Nội', age: 'elder', tag: 'Người già' },
+  { name: 'Ông Năm', age: 'elder', tag: 'Người già' }
+];
+
+let state = {
+  shopName: 'Tiệm Tạp Hóa Ký Ức',
+  money: 220,
+  debt: 0,
+  stars: 0.0,
+  day: 1,
+  dayTime: 300,
+  mapId: 'truong_hoc',
+  rentPaid: 0,
+  calmStacks: 0,
+  bonusPatienceNext: 0,
+  isOpen: true,
+  activeCat: 'drinks',
+  stock: {},
+  tray: [],
+  order: null,
+  patienceMax: 40,
+  patienceLeft: 40,
+  pendingDash: null,
+  lastTick: Date.now()
+};
+
+function initStockZero() {
+  state.stock = {};
+  ITEMS.forEach(it => { state.stock[it.id] = 0; });
+}
+
+function totalShelfStock() {
+  return Object.values(state.stock).reduce((a, b) => a + (b || 0), 0);
+}
+
+function getWholesaleCost(item, qty = 1) {
+  const unit = Math.max(1, Math.round(item.cost * 0.5));
+  return unit * qty;
+}
+
+function getAvgPrice(catId = null) {
+  const list = catId ? ITEMS.filter(i => i.cat === catId) : ITEMS;
+  if (!list.length) return '0.0';
+  const sum = list.reduce((acc, it) => acc + it.price, 0);
+  return (sum / list.length).toFixed(1);
+}
+
+function getMap() {
+  return MAPS.find(m => m.id === state.mapId) || MAPS[4];
+}
+
+function speak(text, age = 'youth') {
+  try {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'vi-VN';
+    if (age === 'owner') { u.pitch = 1.28; u.rate = 1.06; }
+    else if (age === 'child') { u.pitch = 1.55; u.rate = 1.2; }
+    else if (age === 'elder') { u.pitch = 0.75; u.rate = 0.86; }
+    else { u.pitch = 1.2; u.rate = 1.08; }
+    window.speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+function showToast(msg) {
+  try {
+    const el = document.createElement('div');
+    el.className = 'toast';
+    el.textContent = msg;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1200);
+  } catch (e) {}
+}
+
+function makeOrder() {
+  const map = getMap();
+  const c = CUSTOMERS[Math.floor(Math.random() * CUSTOMERS.length)];
+  const count = c.age === 'child' ? 1 : (Math.random() < 0.65 ? 1 : 2);
+  const picks = [];
+  for (let i = 0; i < count; i++) {
+    const pool = Math.random() < 0.45 ? ITEMS.filter(x => x.cat === map.bias) : ITEMS;
+    picks.push(pool[Math.floor(Math.random() * pool.length)].id);
+  }
+  const names = picks.map(id => ITEMS.find(x => x.id === id).name);
+  const prefix = c.age === 'elder' ? 'Cho cô/chú lấy ' : (c.age === 'child' ? 'Cô chủ ơi, cho con lấy ' : 'Cho mình lấy ');
+  state.order = { char: c, items: picks, text: prefix + names.join(', ') + ' nhé!' };
+  state.patienceMax = 40 + state.bonusPatienceNext;
+  state.patienceLeft = state.patienceMax;
+  state.bonusPatienceNext = 0;
+  if (totalShelfStock() > 0 && state.isOpen) speak(state.order.text, c.age);
+}
+
+function renderShopOwnerSvg() {
+  return `<svg class="owner-svg" viewBox="0 0 88 88" onclick="speak('Chào bạn, cô chủ tiệm đây! Hãy nhập thêm đồ bày lên kệ để mở bán nhé!', 'owner')">
+    <path d="M22 80 Q25 58 44 58 Q63 58 66 80 Z" fill="#e11d48" stroke="#3b2314" stroke-width="2.5"/>
+    <path d="M30 59 L58 59 L60 80 L28 80 Z" fill="#fffaf0" stroke="#3b2314" stroke-width="2"/>
+    <text x="44" y="73" text-anchor="middle" font-size="6.8" font-weight="900" fill="#881337">CÔ CHỦ</text>
+    <ellipse cx="44" cy="38" rx="16" ry="17" fill="#ffdfb8" stroke="#3b2314" stroke-width="2.5"/>
+    <path d="M27 36 Q27 16 44 16 Q61 16 61 36 Q53 26 44 28 Q35 26 27 36 Z" fill="#291509" stroke="#3b2314" stroke-width="2"/>
+    <circle cx="44" cy="14" r="6" fill="#291509" stroke="#3b2314" stroke-width="2"/>
+    <circle cx="38" cy="38" r="2.6" fill="#1e1b18"/>
+    <circle cx="50" cy="38" r="2.6" fill="#1e1b18"/>
+    <circle cx="35" cy="43" r="2.6" fill="#fda4af" opacity="0.7"/>
+    <circle cx="53" cy="43" r="2.6" fill="#fda4af" opacity="0.7"/>
+    <path d="M38 46 Q44 52 50 46" fill="none" stroke="#881337" stroke-width="2.4" stroke-linecap="round"/>
+    <polygon points="18,22 44,8 70,22" fill="#eab308" stroke="#5c3416" stroke-width="2.2"/>
+  </svg>`;
+}
+
+function renderCustomerSvg(c) {
+  const skin = c.age === 'elder' ? '#f3cba5' : '#ffdfb8';
+  const shirt = c.age === 'child' ? '#ef4444' : (c.age === 'elder' ? '#854d27' : '#2563eb');
+  return `<svg class="face-svg" viewBox="0 0 64 64">
+    <path d="M14 60 Q16 47 32 47 Q48 47 50 60 Z" fill="${shirt}" stroke="#3b2314" stroke-width="2.4"/>
+    <ellipse cx="32" cy="33" rx="15" ry="16" fill="${skin}" stroke="#3b2314" stroke-width="2.4"/>
+    <path d="M17 30 Q19 16 32 16 Q45 16 47 30 Q40 23 32 25 Q24 23 17 30 Z" fill="#3b2314" stroke="#3b2314" stroke-width="2"/>
+    <circle cx="26" cy="33" r="2.5" fill="#1e1b18"/>
+    <circle cx="38" cy="33" r="2.5" fill="#1e1b18"/>
+    <path d="M26 42 Q32 47 38 42" fill="none" stroke="#7c2d12" stroke-width="2.2" stroke-linecap="round"/>
+  </svg>`;
+}
+
+function buyAndDisplay(itemId, qty = 3) {
+  const it = ITEMS.find(x => x.id === itemId);
+  if (!it) return;
+  const cost = getWholesaleCost(it, qty);
+  if (state.money < cost) {
+    showToast(`Thiếu ${cost}k để nhập ${it.name}!`);
+    return;
+  }
+  const wasEmpty = totalShelfStock() === 0;
+  state.money -= cost;
+  state.stock[itemId] = (state.stock[itemId] || 0) + qty;
+  if (wasEmpty && !state.order) makeOrder();
+  showToast(`Cô chủ bày +${qty} ${it.name} lên kệ (-${cost}k)`);
+  render();
+  if (document.getElementById('bulkModal').classList.contains('show')) renderBulkModal();
+}
+
+function restockCategory(qty = 3) {
+  const list = ITEMS.filter(x => x.cat === state.activeCat);
+  let spent = 0;
+  let count = 0;
+  list.forEach(it => {
+    const c = getWholesaleCost(it, qty);
+    if (state.money >= c) {
+      state.money -= c;
+      state.stock[it.id] = (state.stock[it.id] || 0) + qty;
+      spent += c;
+      count++;
+    }
+  });
+  if (!count) { showToast('Không đủ vốn để nhập thêm kệ này!'); return; }
+  if (!state.order) makeOrder();
+  showToast(`Bày thêm +${qty} cho ${count} món (-${spent}k)`);
+  render();
+}
+
+function addToTray(itemId) {
+  if (!state.isOpen) { showToast('Tiệm đang tạm nghỉ!'); return; }
+  if (totalShelfStock() === 0) { showToast('Hãy nhập hàng bày lên kệ trước!'); return; }
+  if (state.tray.length >= 5) { showToast('Khay đã đủ 5 món!'); return; }
+  if ((state.stock[itemId] || 0) <= 0) { showToast('Món này hết trên kệ, bấm Nhập để bày thêm!'); return; }
+  state.stock[itemId] -= 1;
+  state.tray.push(itemId);
+  render();
+}
+
+function clearTray() {
+  state.tray.forEach(id => { state.stock[id] = (state.stock[id] || 0) + 1; });
+  state.tray = [];
+  render();
+}
+
+function settleMoney(amt) {
+  let net = amt;
+  if (state.debt > 0) {
+    const pay = Math.min(state.debt, Math.ceil(amt * 0.4));
+    state.debt -= pay;
+    net -= pay;
+  }
+  state.money += net;
+  return net;
+}
+
+function deliverOrder() {
+  if (!state.order) return;
+  if (!state.tray.length) { showToast('Chưa nhặt món vào khay!'); return; }
+  const req = [...state.order.items].sort();
+  const tr = [...state.tray].sort();
+  if (req.length !== tr.length || !req.every((v, i) => v === tr[i])) {
+    state.stars = Math.max(0, +(state.stars - 0.2).toFixed(1));
+    showToast('Giao sai món! (-0.2⭐)');
+    render();
+    return;
+  }
+  const sold = state.tray.map(id => ITEMS.find(x => x.id === id));
+  const sub = sold.reduce((s, i) => s + i.price, 0);
+  state.tray = [];
+
+  if (Math.random() < 0.14) {
+    state.pendingDash = { name: state.order.char.name, value: sub };
+    state.order = null;
+    document.getElementById('dashBody').textContent = `${state.pendingDash.name} ôm hàng trị giá ${sub}k bỏ chạy! Bạn chọn thế nào?`;
+    openModal('dashModal');
+    render();
+    return;
+  }
+
+  const tip = getMap().tip + (state.patienceMax - state.patienceLeft <= 12 ? 2 : 0);
+  const net = settleMoney(sub + tip);
+  state.stars = Math.min(5.0, +(state.stars + 0.4).toFixed(1));
+  const age = state.order.char.age;
+  speak('Cảm ơn quý khách đã ủng hộ tiệm!', 'owner');
+  setTimeout(() => speak('Đồ của tiệm tốt đấy, lần sau sẽ ghé lại!', age), 1400);
+  showToast(`+${sub + tip}k (Bo +${tip}k, về ví +${net}k) • +0.4⭐`);
+  state.order = null;
+  makeOrder();
+  render();
+}
+
+function triggerDashTest() {
+  const val = state.tray.length
+    ? state.tray.reduce((s, id) => s + ITEMS.find(x => x.id === id).price, 0)
+    : 12;
+  state.tray = [];
+  const cname = state.order ? state.order.char.name : 'Khách lạ';
+  state.pendingDash = { name: cname, value: val };
+  document.getElementById('dashBody').textContent = `${cname} cầm đồ trị giá ${val}k định chạy mất! Chọn 1 để rượt (20%) hoặc 2 để bỏ qua.`;
+  openModal('dashModal');
+}
+
+function resolveDash(chase) {
+  closeModal('dashModal');
+  if (!state.pendingDash) return;
+  const { name, value } = state.pendingDash;
+  state.pendingDash = null;
+  if (chase) {
+    if (Math.random() < 0.20) {
+      settleMoney(value);
+      state.stars = Math.min(5.0, +(state.stars + 0.4).toFixed(1));
+      showToast(`🎉 Rượt kịp ${name}, đòi được +${value}k (+0.4⭐)!`);
+    } else {
+      state.stars = Math.max(0, +(state.stars - 0.2).toFixed(1));
+      showToast(`😓 Rượt hụt ${name}, mất ${value}k (-0.2⭐)`);
+    }
+  } else {
+    state.stars = Math.max(0, +(state.stars - 0.2).toFixed(1));
+    state.bonusPatienceNext += 3;
+    showToast(`😔 Không đuổi theo (-0.2⭐, khách sau +3s kiên nhẫn)`);
+  }
+  if (!state.order) makeOrder();
+  render();
+}
+
+function calmDown() {
+  if (state.money < 5) { showToast('Cần 5k để giữ bình tĩnh!'); return; }
+  state.money -= 5;
+  state.calmStacks += 1;
+  state.bonusPatienceNext += 3;
+  showToast('🧘 Bình tĩnh lại (-5k) • Khách kế +3s chờ');
+  render();
+}
+
+function toggleOpen() {
+  state.isOpen = !state.isOpen;
+  state.lastTick = Date.now();
+  render();
+}
+
+function setPresetName(n) {
+  document.getElementById('shopNameInput').value = n;
+}
+
+function confirmName() {
+  const raw = (document.getElementById('shopNameInput').value || '').trim();
+  state.shopName = raw || 'Tiệm Tạp Hóa Ký Ức';
+  closeModal('nameModal');
+  speak(`Chào mừng đến ${state.shopName}! Hãy nhập hàng bày ra bán nhé.`, 'owner');
+  showToast(`Chào mừng "${state.shopName}"! Hãy nhập hàng bày kệ nhé.`);
+  render();
+}
+
+function openModal(id) {
+  if (id === 'nameModal') document.getElementById('shopNameInput').value = state.shopName;
+  if (id === 'bulkModal') renderBulkModal();
+  if (id === 'infoModal') renderInfoModal();
+  document.getElementById(id).classList.add('show');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+  state.lastTick = Date.now();
+}
+
+function renderBulkModal() {
+  document.getElementById('bulkBody').innerHTML = ITEMS.map(it => {
+    const c3 = getWholesaleCost(it, 3);
+    const c6 = getWholesaleCost(it, 6);
+    const cur = state.stock[it.id] || 0;
+    return `
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid #ecd6ab;">
+        <div>
+          <b>${it.name}</b> <span style="font-size:10px;opacity:0.75;">(Kệ: ${cur} • Bán ${it.price}k)</span>
+        </div>
+        <div style="display:flex;gap:4px;">
+          <button class="btn green" onclick="buyAndDisplay('${it.id}', 3)">+3 (${c3}k)</button>
+          <button class="btn amber" onclick="buyAndDisplay('${it.id}', 6)">+6 (${c6}k)</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function chooseMap(mapId) {
+  state.mapId = mapId;
+  state.rentPaid = 0;
+  showToast(`Chuyển sang ${getMap().name}`);
+  renderInfoModal();
+  render();
+}
+
+function payRent(amt) {
+  const remain = Math.max(0, getMap().rent - state.rentPaid);
+  const pay = Math.min(remain, amt, state.money);
+  if (pay <= 0) { showToast('Chưa đủ tiền hoặc đã trả đủ tuần!'); return; }
+  state.money -= pay;
+  state.rentPaid += pay;
+  showToast(`Đã trả ${pay}k tiền mặt bằng`);
+  renderInfoModal();
+  render();
+}
+
+function takeLoan() {
+  if (state.debt > 0) { showToast('Còn nợ cũ chưa trả xong!'); return; }
+  state.money += 120;
+  state.debt = 150;
+  showToast('Vay +120k (nợ 150k)');
+  renderInfoModal();
+  render();
+}
+
+function renderInfoModal() {
+  const m = getMap();
+  const remain = Math.max(0, m.rent - state.rentPaid);
+  const catRows = CATEGORIES.map(c => {
+    const list = ITEMS.filter(x => x.cat === c.id);
+    const avgCost = (list.reduce((s, x) => s + x.cost, 0) / list.length).toFixed(1);
+    const avgSale = getAvgPrice(c.id);
+    return `<tr><td>${c.name}</td><td>${avgCost}k</td><td><b>${avgSale}k</b></td></tr>`;
+  }).join('');
+
+  const mapBtns = MAPS.map(x => `<button class="btn ${x.id === state.mapId ? 'active' : ''}" onclick="chooseMap('${x.id}')">${x.name} (${x.rent}k)</button>`).join('');
+
+  document.getElementById('infoBody').innerHTML = `
+    <div style="margin-bottom:8px;">
+      <b>📍 Mặt Bằng (${m.name} • Còn thiếu ${remain}k):</b>
+      <div style="display:flex;flex-wrap:wrap;gap:4px;margin:5px 0;">${mapBtns}</div>
+      <div style="display:flex;gap:5px;">
+        <button class="btn green" onclick="payRent(100)">Đóng 100k</button>
+        <button class="btn amber" onclick="payRent(${remain})">Đóng hết (${remain}k)</button>
+        <button class="btn" onclick="takeLoan()">Vay +120k</button>
+      </div>
+    </div>
+    <div>
+      <b>📊 Giá Trung Bình (Toàn tiệm TB bán: ${getAvgPrice()}k):</b>
+      <table style="width:100%;border-collapse:collapse;margin-top:5px;font-size:11px;">
+        <thead><tr><th style="border:1px solid #d6b885;padding:4px;text-align:left;">Kệ</th><th style="border:1px solid #d6b885;padding:4px;text-align:left;">Gốc TB</th><th style="border:1px solid #d6b885;padding:4px;text-align:left;">Bán TB</th></tr></thead>
+        <tbody>${catRows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function resetGame() {
+  state = {
+    shopName: 'Tiệm Tạp Hóa Ký Ức',
+    money: 220,
+    debt: 0,
+    stars: 0.0,
+    day: 1,
+    dayTime: 300,
+    mapId: 'truong_hoc',
+    rentPaid: 0,
+    calmStacks: 0,
+    bonusPatienceNext: 0,
+    isOpen: true,
+    activeCat: 'drinks',
+    stock: {},
+    tray: [],
+    order: null,
+    patienceMax: 40,
+    patienceLeft: 40,
+    pendingDash: null,
+    lastTick: Date.now()
+  };
+  initStockZero();
+  render();
+  openModal('nameModal');
+}
+
+setInterval(() => {
+  try {
+    const now = Date.now();
+    const dt = Math.min(1, (now - state.lastTick) / 1000);
+    state.lastTick = now;
+
+    const modalOpen = document.querySelector('.backdrop.show') !== null;
+    if (!state.isOpen || modalOpen) return;
+
+    if (totalShelfStock() === 0) {
+      renderHud();
+      return;
+    }
+
+    if (!state.order) makeOrder();
+    state.dayTime = Math.max(0, state.dayTime - dt);
+    state.patienceLeft -= dt;
+
+    if (state.patienceLeft <= 0) {
+      state.stars = Math.max(0, +(state.stars - 0.2).toFixed(1));
+      clearTray();
+      showToast(`${state.order.char.name} đợi lâu bỏ đi (-0.2⭐)`);
+      makeOrder();
+    }
+
+    if (state.dayTime <= 0) {
+      state.day = state.day >= 7 ? 1 : state.day + 1;
+      state.dayTime = 300;
+      showToast(`Sang Ngày ${state.day}/7`);
+    }
+
+    renderHud();
+  } catch (e) {}
+}, 120);
+
+function renderHud() {
+  const m = getMap();
+  const sec = Math.max(0, Math.ceil(state.dayTime));
+  const mm = String(Math.floor(sec / 60)).padStart(2, '0');
+  const ss = String(sec % 60).padStart(2, '0');
+  document.getElementById('hudMoney').textContent = state.debt > 0 ? `${state.money}k (-${state.debt}k)` : `${state.money}k`;
+  document.getElementById('hudStars').textContent = `⭐ ${state.stars.toFixed(1)}`;
+  document.getElementById('hudDay').textContent = `N${state.day}/7 • ${mm}:${ss}`;
+  document.getElementById('hudRent').textContent = `${state.rentPaid}/${m.rent}k`;
+
+  const hasStock = totalShelfStock() > 0;
+  const banner = document.getElementById('statusBanner');
+  const bText = document.getElementById('bannerText');
+  if (!hasStock) {
+    banner.className = 'banner paused';
+    bText.textContent = '⏸ Chưa bày hàng lên kệ: Đang tạm dừng đếm giờ! Nhập đồ để cô chủ bày bán.';
+  } else {
+    banner.className = 'banner';
+    bText.textContent = `🟢 Đang bày ${totalShelfStock()} món • Nhập sỉ rẻ 50% • Chạm mặt khách nghe giọng đọc.`;
+  }
+  document.getElementById('avgBadge').textContent = `TB kệ: ${getAvgPrice(state.activeCat)}k | TB tiệm: ${getAvgPrice()}k`;
+
+  const pct = Math.max(0, Math.min(100, (state.patienceLeft / state.patienceMax) * 100));
+  const fill = document.getElementById('patienceFill');
+  const pSec = document.getElementById('patienceSec');
+  if (fill) fill.style.width = pct + '%';
+  if (pSec) pSec.textContent = `${Math.max(0, state.patienceLeft).toFixed(1)}s`;
+}
+
+function render() {
+  try {
+    const m = getMap();
+    document.getElementById('shopNameTitle').textContent = `🏮 ${state.shopName}`;
+    document.getElementById('mapSub').textContent = `📍 ${m.name} • Thuê ${m.rent}k/tuần`;
+    document.getElementById('openBtn').textContent = state.isOpen ? '🟢 Đang Mở' : '🔴 Tạm Nghỉ';
+    document.getElementById('calmLabel').textContent = `🧘 Bình Tĩnh: ${state.calmStacks} (+${state.bonusPatienceNext}s)`;
+
+    const stage = document.getElementById('stageSection');
+    if (totalShelfStock() === 0) {
+      stage.innerHTML = `
+        <div class="empty-shop-stage">
+          ${renderShopOwnerSvg()}
+          <div class="owner-bubble">
+            "Chào mừng tới <b>${state.shopName}</b>! Kệ đang trống nên đồng hồ tạm dừng — bấm nhập hàng để cô chủ bày ra bán nhé!"
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;">
+            <button class="btn green" onclick="buyAndDisplay(ITEMS.find(x => x.cat === state.activeCat).id, 3)">+3 Món Đầu Kệ</button>
+            <button class="btn amber" onclick="openModal('bulkModal')">📦 Mở Danh Sách Nhập Đồ</button>
+          </div>
+        </div>
+      `;
+    } else {
+      if (!state.order) makeOrder();
+      const c = state.order.char;
+      const trayCopy = [...state.tray];
+      const chips = state.order.items.map(id => {
+        const it = ITEMS.find(x => x.id === id);
+        const idx = trayCopy.indexOf(id);
+        const ok = idx !== -1;
+        if (ok) trayCopy.splice(idx, 1);
+        return `<span class="chip ${ok ? 'ok' : ''}" onclick="addToTray('${id}')">${ok ? '✅' : '🛒'} ${it.name} (${it.price}k)</span>`;
+      }).join('');
+
+      stage.innerHTML = `
+        <div class="customer-row">
+          <div class="face-box" onclick="speak(state.order.text, c.age)">
+            ${renderCustomerSvg(c)}
+            <span class="voice-tag">🔊 ${c.tag}</span>
+          </div>
+          <div class="cust-info">
+            <div style="font-size:12px;font-weight:900;">${c.name} <span style="font-size:10px;opacity:0.75;">(${c.tag})</span></div>
+            <div class="order-say">"${state.order.text}"</div>
+            <div class="chips">${chips}</div>
+            <div class="bar-wrap">
+              <span>Chờ</span>
+              <div class="bar"><div class="bar-fill" id="patienceFill" style="width:100%"></div></div>
+              <span id="patienceSec">40.0s</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    document.getElementById('catGrid').innerHTML = CATEGORIES.map(c =>
+      `<div class="cat-btn ${c.id === state.activeCat ? 'active' : ''}" onclick="state.activeCat='${c.id}';render();">${c.name}</div>`
+    ).join('');
+
+    const needSet = new Set(state.order ? state.order.items : []);
+    const catItems = ITEMS.filter(x => x.cat === state.activeCat);
+    document.getElementById('itemsGrid').innerHTML = catItems.map(it => {
+      const stk = state.stock[it.id] || 0;
+      const wCost = getWholesaleCost(it, 3);
+      return `
+        <div class="item-card ${needSet.has(it.id) ? 'need' : ''}">
+          <div class="item-top">
+            <span class="item-name">${it.name}</span>
+            <span class="badge-stock ${stk <= 0 ? 'empty' : ''}">Kệ: ${stk}</span>
+          </div>
+          <div class="item-prices">Bán: <b>${it.price}k</b> • Nhập 3: <b>${wCost}k</b> (-50%)</div>
+          <div class="item-btns">
+            <button class="btn green" onclick="buyAndDisplay('${it.id}', 3)">+3 Bày</button>
+            <button class="btn" onclick="addToTray('${it.id}')">Bỏ Khay</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    const sumTray = state.tray.reduce((s, id) => s + ITEMS.find(x => x.id === id).price, 0);
+    document.getElementById('trayTitle').textContent = `🧺 Khay Giao (${state.tray.length}/5) • ${sumTray}k`;
+    document.getElementById('trayList').innerHTML = state.tray.length
+      ? state.tray.map((id, idx) => `<span class="chip" onclick="state.tray.splice(${idx},1);state.stock['${id}']=(state.stock['${id}']||0)+1;render();">${ITEMS.find(x=>x.id===id).name} ✕</span>`).join('')
+      : '<span style="font-size:11px;opacity:0.7;">Chạm "Bỏ Khay" hoặc tên món khách cần để xếp đồ giao.</span>';
+
+    renderHud();
+  } catch (err) {
+    document.body.innerHTML = `<div style="padding:16px;background:#fffaf0;color:#3b2314;font-family:sans-serif;">Lỗi hiển thị: ${err.message}</div>`;
+  }
+}
+
+initStockZero();
+render();
+</script>
+</body>
+</html>
